@@ -18,3 +18,10 @@ jobs:
         run: uv sync
       - name: Run tests
         run: uv run pytest
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: docker build -t heaven-backend:$(git rev-parse --short HEAD) .
