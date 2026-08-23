@@ -9,6 +9,12 @@ uv sync          # install dependencies
 uv run main.py   # start the server on http://0.0.0.0:8000
 ```
 
+Or with Docker:
+
+```sh
+docker compose up --build   # build and start the server on http://localhost:8000
+```
+
 ## API
 
 | Method | Path      | Description                          |
