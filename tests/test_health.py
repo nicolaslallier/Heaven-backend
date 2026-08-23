@@ -1,5 +1,7 @@
 import time
+import tomllib
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -38,9 +40,11 @@ class TestGetHealth:
     def test_uptime_is_non_negative(self) -> None:
         assert get_health().uptime_seconds >= 0.0
 
-    def test_uptime_increases_over_time(self) -> None:
+    def test_uptime_increases_over_time(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        clock = {"now": time.monotonic()}
+        monkeypatch.setattr(main.time, "monotonic", lambda: clock["now"])
         before = get_health().uptime_seconds
-        time.sleep(0.02)
+        clock["now"] += 0.05
         assert get_health().uptime_seconds > before
 
     def test_timestamp_is_valid_utc(self) -> None:
@@ -80,7 +84,10 @@ class TestRootEndpoint:
         assert client.get("/").status_code == 200
 
     def test_reports_health_like_health_endpoint(self, client: TestClient) -> None:
-        assert client.get("/").json() == client.get("/health").json() or True
+        volatile = {"uptime_seconds", "timestamp"}
+        root = {k: v for k, v in client.get("/").json().items() if k not in volatile}
+        health = {k: v for k, v in client.get("/health").json().items() if k not in volatile}
+        assert root == health
 
     def test_body_shape_matches_health(self, client: TestClient) -> None:
         body = client.get("/").json()
@@ -98,3 +105,8 @@ class TestApp:
 
     def test_undefined_route_returns_404(self, client: TestClient) -> None:
         assert client.get("/nope").status_code == 404
+
+    def test_version_matches_pyproject(self) -> None:
+        pyproject = Path(__file__).resolve().parent.parent / "pyproject.toml"
+        with pyproject.open("rb") as f:
+            assert VERSION == tomllib.load(f)["project"]["version"]

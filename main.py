@@ -1,5 +1,7 @@
+import os
 import time
 from datetime import datetime, timezone
+from typing import Literal
 
 import uvicorn
 from fastapi import FastAPI
@@ -17,7 +19,7 @@ app = FastAPI(
 
 
 class HealthResponse(BaseModel):
-    status: str
+    status: Literal["ok"]
     service: str
     version: str
     uptime_seconds: float
@@ -40,14 +42,16 @@ def health() -> HealthResponse:
     return get_health()
 
 
-@app.get("/", response_model=HealthResponse, tags=["health"])
+@app.get("/", response_model=HealthResponse, tags=["health"], include_in_schema=False)
 def root() -> HealthResponse:
     """Root also reports service health."""
     return get_health()
 
 
 def main() -> None:
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    host = os.environ.get("HOST", "0.0.0.0")
+    port = int(os.environ.get("PORT", "8000"))
+    uvicorn.run(app, host=host, port=port)
 
 
 if __name__ == "__main__":
