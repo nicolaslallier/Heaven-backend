@@ -3,7 +3,7 @@ services:
     build: .
     image: heaven-backend
     ports:
-      - "8000:8000"
+      - "${PORT:-8000}:${PORT:-8000}"
     env_file:
       - path: .env
         required: false
