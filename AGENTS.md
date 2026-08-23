@@ -15,6 +15,7 @@ Python project managed with `uv`, pinned to Python 3.14.
 - `.venv/` — virtual environment; gitignored (see `.gitignore`).
 - `Dockerfile` — two-stage build on `ghcr.io/astral-sh/uv:python3.14-bookworm-slim`: deps installed via `uv sync --frozen --no-dev`, runs as non-root `appuser`, `python main.py` entrypoint honoring `HOST`/`PORT` env vars, `/health` healthcheck.
 - `docker-compose.yml` — local dev/deploy stack; single `api` service on port `8000`, optional `.env` (see `.env.example`).
+- `Makefile` — Docker deploy targets: `build`, `up`, `down`, `restart`, `logs`, `ps`, `dev`, `clean`.
 - `.dockerignore` — keeps VCS/caches/`.venv` out of the build context.
 - `README.md` — project overview and API quickstart.
 
@@ -29,6 +30,7 @@ Always run through `uv` (it resolves the pinned 3.14 interpreter), never a bare 
 - Re-sync the env to `uv.lock`: `uv sync`
 - Run the API in Docker: `docker compose up --build` (serves on `http://localhost:8000`)
 - Build the image: `docker build -t heaven-backend .`
+- Docker deploy via Makefile: `make build|up|down|restart|logs|ps|dev|clean` (wraps `docker compose`; `make dev` = `up --build`)
 
 ## Conventions / open questions
 - Flat script layout (single `main.py`), not an installable package: no `src/` package, no `[build-system]`, no console entry point. If Heaven becomes a package/library, add a build backend (e.g. hatchling) and a `src/heaven/` layout.
