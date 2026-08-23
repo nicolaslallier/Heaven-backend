@@ -13,6 +13,8 @@ Or with Docker:
 
 ```sh
 docker compose up --build   # build and start the server on http://localhost:8000
+# or via the Makefile
+make dev                    # same as docker compose up --build
 ```
 
 ## API
